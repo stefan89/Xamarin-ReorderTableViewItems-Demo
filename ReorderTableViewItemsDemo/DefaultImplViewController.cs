@@ -73,8 +73,6 @@ namespace ReorderTableViewDemo
 
 			public override void RowSelected (UITableView tableView, NSIndexPath indexPath)
 			{
-				Console.WriteLine (_stringItems[indexPath.Row]);
-
 				tableView.DeselectRow (indexPath, true);
 			}
 
