@@ -116,6 +116,9 @@ namespace ReorderTableViewDemo
 
 		UIView GetSnapshotFromTableViewCell(UITableViewCell cellToSnapShot)
 		{
+			//Change background color for the long pressed table view cell
+			cellToSnapShot.SelectedBackgroundView = new UIView { BackgroundColor = UIColor.White };
+
 			UIGraphics.BeginImageContextWithOptions (cellToSnapShot.Bounds.Size, false, 0);
 			cellToSnapShot.Layer.RenderInContext (UIGraphics.GetCurrentContext ());
 			UIImage image = UIGraphics.GetImageFromCurrentImageContext ();
@@ -160,7 +163,7 @@ namespace ReorderTableViewDemo
 					cell = new UITableViewCell (UITableViewCellStyle.Default, _cellIdentifier); 
 				}
 				cell.TextLabel.Text = stringItem;
-				
+
 				return cell;
 			}
 
