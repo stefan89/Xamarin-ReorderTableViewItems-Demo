@@ -24,14 +24,14 @@ namespace ReorderTableViewDemo
 				"9e item",
 				"10e item"
 			};
+
+			Title = "Default Reorder Implementation";
+			NavigationController.NavigationBar.BarTintColor = UIColor.FromRGB (25, 173, 234);
 		}
 
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
-
-			Title = "Default Reorder Implementation";
-			NavigationController.NavigationBar.BarTintColor = UIColor.FromRGB (25, 173, 234);
 
 			tableView.Source = new DemoTableSource (_stringItems);
 			tableView.SetEditing (true, false); //necessary to be able to move table cells

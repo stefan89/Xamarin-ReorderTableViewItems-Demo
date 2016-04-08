@@ -27,18 +27,18 @@ namespace ReorderTableViewDemo
 				"9e item",
 				"10e item"
 			};
+
+			Title = "Custom Reorder Implementation";
+			NavigationController.NavigationBar.BarTintColor = UIColor.FromRGB (25, 173, 234);
 		}
 
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
 
-			Title = "Custom Reorder Implementation";
-			NavigationController.NavigationBar.BarTintColor = UIColor.FromRGB (25, 173, 234);
-
 			tableView.Source = new DemoTableSource (_stringItems);
 
-			//Create a new long press gesture
+			//Create long press gesture
 			UILongPressGestureRecognizer longPressGesture = new UILongPressGestureRecognizer { MinimumPressDuration = 0.4 };
 			longPressGesture.AddTarget(() => HandleLongPress(longPressGesture));
 			tableView.AddGestureRecognizer(longPressGesture);
