@@ -47,15 +47,15 @@ namespace ReorderTableViewDemo
 		void HandleLongPress(UILongPressGestureRecognizer recognizer)
 		{
 			CGPoint longPressLocation = recognizer.LocationInView (tableView);
-			NSIndexPath indexPathCurrent = tableView.IndexPathForRowAtPoint (longPressLocation);
+			NSIndexPath currentIndexPathLongPress = tableView.IndexPathForRowAtPoint (longPressLocation);
 
 //2 Handle begin state for long press gesture
 			if (recognizer.State == UIGestureRecognizerState.Began) {
 
-				if (indexPathCurrent != null) {
-					UITableViewCell selectedCell = tableView.CellAt (indexPathCurrent);
+				if (currentIndexPathLongPress != null) {
+					UITableViewCell selectedCell = tableView.CellAt (currentIndexPathLongPress);
 
-					_currentIndexPathSelectedCell = indexPathCurrent;
+					_currentIndexPathSelectedCell = currentIndexPathLongPress;
 
 //3 Create snapshot for UITableViewCell
 					_snapshotOfSelectedCell = GetSnapshotFromTableViewCell (selectedCell);
@@ -88,16 +88,16 @@ namespace ReorderTableViewDemo
 				_snapshotOfSelectedCell.Center = center;
 
 //8 Check: is destination position valid and is it different from the previous index path?
-				if (indexPathCurrent != null && !indexPathCurrent.Equals (_currentIndexPathSelectedCell)) {
+				if (currentIndexPathLongPress != null && !currentIndexPathLongPress.Equals (_currentIndexPathSelectedCell)) {
 				
 //9 Update data source
-					_stringItems.Move (_currentIndexPathSelectedCell.Row, indexPathCurrent.Row);
+					_stringItems.Move (_currentIndexPathSelectedCell.Row, currentIndexPathLongPress.Row);
 
 //10 Move the cell in the tableview
-					tableView.MoveRow (_currentIndexPathSelectedCell, indexPathCurrent);
+					tableView.MoveRow (_currentIndexPathSelectedCell, currentIndexPathLongPress);
 
 //11 Update previous position so it is in sync with UI changes
-					_currentIndexPathSelectedCell = indexPathCurrent;
+					_currentIndexPathSelectedCell = currentIndexPathLongPress;
 				}
 			}
 
@@ -114,9 +114,10 @@ namespace ReorderTableViewDemo
 						selectedCell.Alpha = 1.0f;
 					},
 					() => { //completion
+						selectedCell.SelectedBackgroundView = new UIView { BackgroundColor = UIColor.FromRGB (208, 208, 208) };
 						selectedCell.Hidden = false;
 						_currentIndexPathSelectedCell = null;
-
+	
 						_snapshotOfSelectedCell.RemoveFromSuperview ();
 						_snapshotOfSelectedCell = null;
 					}
@@ -171,6 +172,7 @@ namespace ReorderTableViewDemo
 				UITableViewCell cell = tableView.DequeueReusableCell (_cellIdentifier);
 				if (cell == null){ 
 					cell = new UITableViewCell (UITableViewCellStyle.Default, _cellIdentifier); 
+					cell.SelectedBackgroundView = new UIView { BackgroundColor = UIColor.FromRGB (208, 208, 208) };
 				}
 				cell.TextLabel.Text = stringItem;
 

@@ -38,7 +38,7 @@ namespace ReorderTableViewDemo
 //1 Set Editing to true
 			tableView.SetEditing (true, false); //necessary to be able to move table cells
 
-//5 Make tableview cells selectable while editing
+//4 Make tableview cells selectable while editing
 			tableView.AllowsSelectionDuringEditing = true;
 		}
 
