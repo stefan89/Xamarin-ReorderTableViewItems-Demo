@@ -34,8 +34,12 @@ namespace ReorderTableViewDemo
 			base.ViewDidLoad ();
 
 			tableView.Source = new DemoTableSource (_stringItems);
+
+//1 Set Editing to true
 			tableView.SetEditing (true, false); //necessary to be able to move table cells
-			tableView.AllowsSelectionDuringEditing = true; //necessary to be able to select table cells while editing
+
+//5 Make tableview cells selectable while editing
+			tableView.AllowsSelectionDuringEditing = true;
 		}
 
 		class DemoTableSource : UITableViewSource
@@ -63,7 +67,7 @@ namespace ReorderTableViewDemo
 				string stringItem = _stringItems[indexPath.Row];
 
 				UITableViewCell cell = tableView.DequeueReusableCell (_cellIdentifier);
-				if (cell == null){ 
+				if (cell == null) {
 					cell = new UITableViewCell (UITableViewCellStyle.Default, _cellIdentifier); 
 				}
 				cell.TextLabel.Text = stringItem;
@@ -77,11 +81,14 @@ namespace ReorderTableViewDemo
 			}
 
 			#region movecells
+
+//2 Hide editing icon
 			public override UITableViewCellEditingStyle EditingStyleForRow (UITableView tableView, NSIndexPath indexPath)
 			{
 				return UITableViewCellEditingStyle.None;
 			}
-
+		
+//3 Set 'CanMoveRow' to true and implement method 'MoveRow'
 			public override bool CanMoveRow (UITableView tableView, NSIndexPath indexPath)
 			{
 				return true;
@@ -93,6 +100,7 @@ namespace ReorderTableViewDemo
 
 				tableView.ReloadData ();
 			}
+
 			#endregion
 		}
 	}

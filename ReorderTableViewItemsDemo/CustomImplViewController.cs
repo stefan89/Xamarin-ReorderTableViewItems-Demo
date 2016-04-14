@@ -11,7 +11,7 @@ namespace ReorderTableViewDemo
 	{
 		ObservableCollection<string> _stringItems;
 		UIView _snapshotOfSelectedCell = null;
-		NSIndexPath _indexPathStartPosition = null;
+		NSIndexPath _currentIndexPathSelectedCell = null;
 
 		public CustomImplViewController (IntPtr handle) : base (handle)
 		{
@@ -38,7 +38,7 @@ namespace ReorderTableViewDemo
 
 			tableView.Source = new DemoTableSource (_stringItems);
 
-			//Create long press gesture
+//1 Create long press gesture and add this to the tableview
 			UILongPressGestureRecognizer longPressGesture = new UILongPressGestureRecognizer { MinimumPressDuration = 0.4 };
 			longPressGesture.AddTarget(() => HandleLongPress(longPressGesture));
 			tableView.AddGestureRecognizer(longPressGesture);
@@ -49,64 +49,74 @@ namespace ReorderTableViewDemo
 			CGPoint longPressLocation = recognizer.LocationInView (tableView);
 			NSIndexPath indexPathCurrent = tableView.IndexPathForRowAtPoint (longPressLocation);
 
+//2 Handle begin state for long press gesture
 			if (recognizer.State == UIGestureRecognizerState.Began) {
 
 				if (indexPathCurrent != null) {
 					UITableViewCell selectedCell = tableView.CellAt (indexPathCurrent);
 
-					_indexPathStartPosition = indexPathCurrent;
+					_currentIndexPathSelectedCell = indexPathCurrent;
 
+//3 Create snapshot for UITableViewCell
 					_snapshotOfSelectedCell = GetSnapshotFromTableViewCell (selectedCell);
 					CGPoint center = selectedCell.Center;
 
 					_snapshotOfSelectedCell.Center = center;
 					_snapshotOfSelectedCell.Alpha = 0.0f;
+
+//4 Add the snapshot as subview to the tableview
 					tableView.AddSubview (_snapshotOfSelectedCell);
 
-					//Add the snapshot as subview, centered at cell's center
+//5 make snapshot animated visible -> centered at long pressed position
 					UIView.Animate (0.25, () => {
 						center.Y = longPressLocation.Y;
 						_snapshotOfSelectedCell.Center = center;
-						_snapshotOfSelectedCell.Transform = CGAffineTransform.MakeScale (1.05f, 1.05f);
+						_snapshotOfSelectedCell.Transform = CGAffineTransform.MakeScale (1.05f, 1.05f); //make snapshot a little bit bigger than the original cell
 						_snapshotOfSelectedCell.Alpha = 0.98f;
 						selectedCell.Alpha = 0.0f;
 						selectedCell.Hidden = true;
 					});
 				}
 			}
+
+//6 Handle changed state for long press gesture
 			else if (recognizer.State == UIGestureRecognizerState.Changed) {
+
+//7 Move snapshot to new longpressed position
 				CGPoint center = _snapshotOfSelectedCell.Center;
 				center.Y = longPressLocation.Y;
 				_snapshotOfSelectedCell.Center = center;
 
-				//Is destination position valid and is it different from the start position?
-				if (indexPathCurrent != null && !indexPathCurrent.Equals (_indexPathStartPosition)) {
+//8 Check: is destination position valid and is it different from the previous index path?
+				if (indexPathCurrent != null && !indexPathCurrent.Equals (_currentIndexPathSelectedCell)) {
+				
+//9 Update data source
+					_stringItems.Move (_currentIndexPathSelectedCell.Row, indexPathCurrent.Row);
 
-					//Update data source
-					_stringItems.Move (_indexPathStartPosition.Row, indexPathCurrent.Row);
+//10 Move the cell in the tableview
+					tableView.MoveRow (_currentIndexPathSelectedCell, indexPathCurrent);
 
-					//Move the rows
-					tableView.MoveRow (_indexPathStartPosition, indexPathCurrent);
-
-					//Update start position so it is in sync with UI changes
-					_indexPathStartPosition = indexPathCurrent;
+//11 Update previous position so it is in sync with UI changes
+					_currentIndexPathSelectedCell = indexPathCurrent;
 				}
 			}
-			else { //ended or failed
-				//Clean up
-				UITableViewCell cell = tableView.CellAt (_indexPathStartPosition);
-				cell.Alpha = 0.0f;
 
-				UIView.Animate (0.25f, 
+//12 Handle ended state for long press gesture -> clean up
+			else { //State is ended or failed
+				UITableViewCell selectedCell = tableView.CellAt (_currentIndexPathSelectedCell);
+
+//13 Make snapshat invisible and remove it from the superview - also make the selected cell visible again
+				UIView.Animate (0.25f,
 					() => { //animation
-						_snapshotOfSelectedCell.Center = cell.Center;
-						_snapshotOfSelectedCell.Transform = CGAffineTransform.MakeIdentity ();
+						_snapshotOfSelectedCell.Center = selectedCell.Center;
+						_snapshotOfSelectedCell.Transform = CGAffineTransform.MakeIdentity (); //restores view to original size
 						_snapshotOfSelectedCell.Alpha = 0.0f;
-						cell.Alpha = 1.0f;
-					}, 
+						selectedCell.Alpha = 1.0f;
+					},
 					() => { //completion
-						cell.Hidden = false;
-						_indexPathStartPosition = null;
+						selectedCell.Hidden = false;
+						_currentIndexPathSelectedCell = null;
+
 						_snapshotOfSelectedCell.RemoveFromSuperview ();
 						_snapshotOfSelectedCell = null;
 					}
